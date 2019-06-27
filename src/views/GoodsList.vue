@@ -31,7 +31,7 @@
                 <ul>
                   <li v-for="(item,index) in goodsList">
                     <div class="pic">
-                      <a href="#"><img v-lazy="'/static/'+item.productImg" alt=""></a>
+                      <a href="#"><img v-lazy="'/static/'+item.productImage" alt=""></a>
                     </div>
                     <div class="main">
                       <div class="name">{{item.productName}}</div>
@@ -79,6 +79,14 @@
                   </li>
                 </ul>
               </div>
+
+              <div class="view-more-normal"
+                   v-infinite-scroll="loadMore"
+                   infinite-scroll-disabled="busy"
+                   infinite-scroll-distance="20">
+                <img src="./../assets/loading-spinning-bubbles.svg" v-show="loading">
+              </div>
+
             </div>
           </div>
         </div>
@@ -117,6 +125,10 @@
                 }
               ],
               sortFlag:true,
+              page:1,
+              pageSize:8,
+              busy:true,
+              loading:false,
               priceChecked:'all',
               filterBy:false,
               overLayFlag:false
@@ -129,17 +141,174 @@
         },
        mounted:function(){
           this.getGoodsList();
+
        },
       methods:{
         getGoodsList(){
-          axios.get("/goods").then((result) => {
-            var res = result.data;
-            this.goodsList = res.result;
+          var param = {
+            page:this.page,
+            pageSize:this.pageSize,
+            sort:this.sortFlag?1:-1,
+            priceLevel:this.priceChecked
+          };
+          this.loading = true;
+          var myData = {
+            "status":"0",
+            "msg":"",
+            "result":{
+              "count":8,
+              "list":[
+                {
+                  "_id":"01",
+                  "productId":"001",
+                  "productName":"自拍杆",
+                  "salePrice":39,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"02",
+                  "productId":"002",
+                  "productName":"自拍杆",
+                  "salePrice":392,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"03",
+                  "productId":"003",
+                  "productName":"自拍杆",
+                  "salePrice":393,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"04",
+                  "productId":"004",
+                  "productName":"自拍杆",
+                  "salePrice":394,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"05",
+                  "productId":"005",
+                  "productName":"自拍杆",
+                  "salePrice":395,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"06",
+                  "productId":"006",
+                  "productName":"自拍杆",
+                  "salePrice":396,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"07",
+                  "productId":"007",
+                  "productName":"自拍杆",
+                  "salePrice":37,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"08",
+                  "productId":"008",
+                  "productName":"自拍杆",
+                  "salePrice":398,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"10",
+                  "productId":"010",
+                  "productName":"自拍杆",
+                  "salePrice":3910,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"11",
+                  "productId":"011",
+                  "productName":"自拍杆",
+                  "salePrice":3911,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                },
+                {
+                  "_id":"12",
+                  "productId":"012",
+                  "productName":"自拍杆",
+                  "salePrice":3912,
+                  "productImage":"zipai.jpg",
+                  "productUrl":""
+                }
+              ]
+
+            }
+          };
+          this.goodsList = myData.result.list;
+          console.log( this.goodsList,'===== this.goodsList');
+
+//          axios.get("/goods").then((result) => {
+//            var res = result.data;
+//            this.goodsList = res.result;
+//          });
+
+          axios.get("/goods,{params:param}").then((response) => {
+              let res =response.data;
+              this.loading = false;
+              if(res.status == "0"){
+                  if(flag){
+                    this.goodsList = this.goodsList.concat(res.result.list);
+                    if(res.result.count == 0){
+                      this.busy = true;
+                    }else{
+                      this.busy = false;
+                    }
+                  }else{
+                    this.goodsList = res.result.list;
+                    this.busy = false;
+                  }
+              }else{
+                this.goodsList = [];
+              }
+          })
+
+
+        },
+        sortGoods(){
+          this.sortFlag = !this.sortFlag;
+          this.page = 1;
+          this.getGoodsList();
+        },
+        loadMore(){
+          this.busy = true;
+          setTimeout(() => {
+            this.page++;
+            this.getGoodsList(true);
+          }, 500);
+        },
+        addCart(productId){
+          axios.post("/goods/addCart",{
+            productId:productId
+          }).then((res)=>{
+            var res = res.data;
+            if(res.status==0){
+              this.mdShowCart = true;
+              this.$store.commit("updateCartCount",1);
+            }else{
+              this.mdShow = true;
+            }
           });
         },
         setPriceFilter(index){
             this.priceChecked = index;
-            this.closePop();
+            this.page = 1;
+            this.getGoodsList();
         },
         showFilterPop(){
           this.filterBy=true;
