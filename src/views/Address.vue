@@ -95,11 +95,11 @@
             <div class="addr-list-wrap">
               <div class="addr-list">
                 <ul>
-                  <li>
+                  <li v-for="item in addressListFilter">
                     <dl>
-                      <dt>Jack</dt>
-                      <dd class="address">海淀区朝阳公园</dd>
-                      <dd class="tel">18610000000</dd>
+                      <dt>{{item.userName}}</dt>
+                      <dd class="address">{{item.streetName}}</dd>
+                      <dd class="tel">{{item.tel}}</dd>
                     </dl>
                     <div class="addr-opration addr-del">
                       <a href="javascript:;" class="addr-del-btn">
@@ -139,7 +139,7 @@
               </div>
 
               <div class="shipping-addr-more">
-                <a class="addr-more-btn up-down-btn" href="javascript:;">
+                <a class="addr-more-btn up-down-btn" href="javascript:;" @click="expand">
                   more
                   <i class="i-up-down">
                     <i class="i-up-down-l"></i>
@@ -205,11 +205,84 @@
 <style>
 </style>
 <script>
+  import NavHeader from './../components/NavHeader'
+  import NavFooter from './../components/NavFooter'
+  import NavBread from './../components/NavBread'
+  import Modal from './../components/Modal'
+  import {currency} from './../util/currency'
+  import axios from 'axios'
   export default{
       data(){
           return{
-
+            limit:3,
+            addressList:[]
           }
+      },
+      mounted(){
+        this.init();
+      },
+      computed:{
+        addressListFilter(){
+            return this.addressList.slice(0,this.limit);
+        }
+      },
+      components:{
+        NavHeader,
+        NavFooter,
+        NavBread,
+        Modal
+      },
+      methods:{
+        init(){
+//          axios.get("/users/addressList").then((response)=>{
+//            let res = response.data;
+//            this.addressList = res.result;
+//            this.selectedAddrId = this.addressList[0].addressId;
+//          });
+          this.addressList = [{
+            userName:'bin',
+            streetName:'市区',
+            tel:'6581761'
+          },
+            {
+              userName:'bin2',
+              streetName:'市区2',
+              tel:'6581762'
+            },
+            {
+              userName:'bin3',
+              streetName:'市区3',
+              tel:'6581763'
+            },
+            {
+              userName:'bin4',
+              streetName:'市区4',
+              tel:'6581764'
+            },
+            {
+              userName:'bin5',
+              streetName:'市区5',
+              tel:'6581765'
+            },
+            {
+              userName:'bin6',
+              streetName:'市区6',
+              tel:'6581766'
+            },
+            {
+              userName:'bin7',
+              streetName:'市区7',
+              tel:'6581767'
+            }]
+        },
+        expand(){
+          if(this.limit == 3){
+             this.limit = this.addressList.length;
+          }else{
+            this.limit = 3;
+          }
+        }
       }
+
   }
 </script>
