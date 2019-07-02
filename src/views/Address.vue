@@ -95,7 +95,7 @@
             <div class="addr-list-wrap">
               <div class="addr-list">
                 <ul>
-                  <li v-for="item in addressListFilter">
+                  <li v-for="(item,index) in addressListFilter" v-bind:class="{'check':checkIndex==index}" @click="checkIndex=index;">
                     <dl>
                       <dt>{{item.userName}}</dt>
                       <dd class="address">{{item.streetName}}</dd>
@@ -139,7 +139,7 @@
               </div>
 
               <div class="shipping-addr-more">
-                <a class="addr-more-btn up-down-btn" href="javascript:;" @click="expand">
+                <a class="addr-more-btn up-down-btn" href="javascript:;" @click="expand" v-bind:class="{'open':limit>3}">
                   more
                   <i class="i-up-down">
                     <i class="i-up-down-l"></i>
@@ -215,6 +215,7 @@
       data(){
           return{
             limit:3,
+            checkIndex:0,
             addressList:[]
           }
       },
