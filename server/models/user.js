@@ -22,8 +22,7 @@ var userSchema = new mongoose.Schema({
       "postCode": Number,
       "tel": Number,
       "isDefault": Boolean
-    }
-  ]
+    }]
 
 });
 
