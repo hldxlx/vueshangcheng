@@ -90,10 +90,10 @@
               </ul>
             </div>
             <ul class="cart-item-list">
-              <li>
+              <li v-for="item in cartList" v-if="item.checked=='1'">
                 <div class="cart-tab-1">
                   <div class="cart-item-pic">
-                    <img src="/static/1.jpg" alt="XX">
+                    <img v-lazy="'/static/'+item.productImage" :alt="item.productName">
                   </div>
                   <div class="cart-item-title">
                     <div class="item-name">XX</div>
@@ -127,23 +127,23 @@
             <ul>
               <li>
                 <span>Item subtotal:</span>
-                <span>5000</span>
+                <span>{{subTotal|currency('$')}}</span>
               </li>
               <li>
                 <span>Shipping:</span>
-                <span>30</span>
+                <span>{{shipping|currency('$')}}</span>
               </li>
               <li>
                 <span>Discount:</span>
-                <span>100</span>
+                <span>{{discount|currency('$')}}</span>
               </li>
               <li>
                 <span>Tax:</span>
-                <span>300</span>
+                <span>{{tax|currency('$')}}</span>
               </li>
               <li class="order-total-price">
                 <span>Order total:</span>
-                <span>5230</span>
+                <span>{{orderTotal|currency('$')}}</span>
               </li>
             </ul>
           </div>
@@ -151,10 +151,10 @@
 
         <div class="order-foot-wrap">
           <div class="prev-btn-wrap">
-            <a class="btn btn--m">Previous</a>
+            <router-link class="btn btn--m" to="/address">Previous</router-link>
           </div>
           <div class="next-btn-wrap">
-            <button class="btn btn--m btn--red">Proceed to payment</button>
+            <button class="btn btn--m btn--red" @click="payMent">Proceed to payment</button>
           </div>
         </div>
       </div>
@@ -190,11 +190,59 @@
   </div>
 </template>
 <script>
+  import NavHeader from './../components/NavHeader'
+  import NavFooter from './../components/NavFooter'
+  import NavBread from './../components/NavBread'
+  import {currency} from './../util/currency'
+  import axios from 'axios'
   export default{
       data(){
           return{
-
+            shipping:100,
+            discount:200,
+            tax:400,
+            subTotal:0,
+            orderTotal:0,
+            cartList:[]
           }
+      },
+      mounted(){
+        this.init();
+      },
+      components:{
+        NavHeader,
+          NavFooter,
+          NavBread
+      },
+      methods:{
+        init(){
+          axios.get("/users/cartList").then((response)=>{
+            let res = response.data;
+            this.cartList = res.result;
+
+            this.cartList.forEach((item)=>{
+              if(item.checked=='1'){
+                this.subTotal += item.salePrice*item.productNum;
+              }
+            });
+
+            this.orderTotal = this.subTotal+this.shipping-this.discount+this.tax;
+          });
+        },
+        payMent(){
+          var addressId = this.$route.query.addressId;
+          axios.post("/users/payMent",{
+            addressId:addressId,
+            orderTotal:this.orderTotal
+          }).then((response)=>{
+            let res = response.data;
+            if(res.status=="0"){
+              this.$router.push({
+                path:'/orderSuccess?orderId='+res.result.orderId
+              })
+            }
+          })
+        }
       }
   }
 </script>
